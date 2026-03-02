@@ -24,7 +24,7 @@
 - Canvas for waveform visualization
 
 ### How to Use
-1. Open `index.html` in any modern browser (Chrome, Firefox, Edge, Safari).
+1. Open [website](majiangla.github.io/SoundGen) in any modern browser (Chrome, Firefox, Edge, Safari).
 2. Click the **Start** button to begin audio playback.
 3. Choose a waveform, adjust frequency, volume, and panning.
 4. The waveform display updates in real time.
@@ -34,10 +34,6 @@
 - [Bilibili](https://space.bilibili.com/1431497051)
 - [GitHub Repository](https://github.com/majiangla/SoundGen)
 
-### License / Disclaimer
-This project includes ICP filing information as required by Chinese regulations:  
-- [苏ICP备2026009271号-1](https://beian.miit.gov.cn)  
-- [苏公网安备32011102010818号](https://beian.mps.gov.cn/#/query/webSearch)
 
 ---
 
@@ -61,7 +57,7 @@ This project includes ICP filing information as required by Chinese regulations:
 - Canvas 用于波形绘制
 
 ### 使用方法
-1. 在现代浏览器中打开 `index.html`（推荐 Chrome、Firefox、Edge、Safari）。
+1. 在现代浏览器中打开 [网站](majiangla.github.io/SoundGen)（推荐 Chrome、Firefox、Edge、Safari）。
 2. 点击 **开始** 按钮播放音频。
 3. 选择波形，调节频率、音量和平衡。
 4. 波形显示区域会实时更新。
@@ -71,10 +67,6 @@ This project includes ICP filing information as required by Chinese regulations:
 - [Bilibili 空间](https://space.bilibili.com/1431497051)
 - [GitHub 仓库](https://github.com/majiangla/SoundGen)
 
-### 备案信息
-根据中国法规要求，页面底部包含以下备案信息：  
-- [苏ICP备2026009271号-1](https://beian.miit.gov.cn)  
-- [苏公网安备32011102010818号](https://beian.mps.gov.cn/#/query/webSearch)
 
 ---
 
