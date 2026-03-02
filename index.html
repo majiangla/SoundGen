@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+<title>声音发生器</title>
+<style>
+:root{
+    --accent: #0066ff;
+    --bg: #f8fafd;
+    --card: #ffffff;
+    --text: #1e293b;
+    --border: #e2e8f0;
+    --shadow: rgba(0,0,0,0.04) 0 8px 20px;
+    --slider-track: #d0d9e8;
+}
+
+* {
+    box-sizing: border-box;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent; /* 移除移动端点击高亮 */
+}
+
+body {
+    margin: 0;
+    font-family: 'Segoe UI', 'Inter', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 12px; /* 略微缩小边距 */
+}
+
+.container {
+    width: 1000px;
+    max-width: 100%;
+    background: transparent;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    gap: 10px;
+}
+
+h1 {
+    margin: 0;
+    font-size: 1.9rem;
+    font-weight: 500;
+    letter-spacing: 1px;
+    color: var(--text);
+    border-left: 6px solid var(--accent);
+    padding-left: 18px;
+    line-height: 1.2;
+    flex-shrink: 0; /* 防止压缩 */
+}
+
+.start-btn {
+    background: var(--card);
+    border: 2px solid var(--accent);
+    color: var(--accent);
+    font-size: 1.2rem;
+    font-weight: 600;
+    padding: 10px 32px;
+    border-radius: 60px;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,102,255,0.1);
+    transition: all 0.2s;
+    letter-spacing: 0.5px;
+    margin: 0;
+    white-space: nowrap;
+}
+
+.start-btn:hover {
+    background: var(--accent);
+    color: white;
+    box-shadow: 0 8px 16px rgba(0,102,255,0.25);
+    transform: scale(1.02);
+}
+
+.controls-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+}
+
+.card {
+    background: var(--card);
+    border-radius: 24px;
+    padding: 16px 20px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    transition: box-shadow 0.15s;
+}
+
+.card:hover {
+    box-shadow: 0 12px 28px rgba(0,0,0,0.08);
+}
+
+.card h3 {
+    margin-top: 0;
+    margin-bottom: 14px;
+    font-size: 1.15rem;
+    font-weight: 500;
+    color: var(--text);
+    opacity: 0.9;
+    border-bottom: 1px dashed var(--border);
+    padding-bottom: 8px;
+}
+
+.radio-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: center;
+}
+
+.radio-group label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+input[type="radio"] {
+    accent-color: var(--accent);
+    width: 16px;
+    height: 16px;
+    margin: 0;
+}
+
+input[type="range"] {
+    width: 100%;
+    margin: 8px 0 4px;
+    height: 6px;
+    background: var(--slider-track);
+    border-radius: 10px;
+    -webkit-appearance: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    background: var(--accent);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,102,255,0.3);
+    border: 2px solid white;
+}
+
+/* 增大移动端滑块触点 */
+@media (max-width: 600px) {
+    input[type="range"]::-webkit-slider-thumb {
+        width: 24px;
+        height: 24px;
+    }
+}
+
+input[type="number"] {
+    width: 130px;
+    padding: 8px 12px;
+    background: #f1f5f9;
+    border: 1px solid var(--border);
+    border-radius: 40px;
+    color: var(--text);
+    font-weight: 500;
+    font-size: 0.95rem;
+    outline: none;
+    transition: 0.15s;
+}
+
+input[type="number"]:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(0,102,255,0.15);
+}
+
+.value {
+    color: var(--accent);
+    font-weight: 600;
+    background: #eef4ff;
+    padding: 2px 12px;
+    margin-left:10px;
+    border-radius: 40px;
+    font-size: 0.95rem;
+    display: inline-block;
+    white-space: nowrap;
+}
+
+.card p {
+    margin: 10px 0 0 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* 普通按钮样式 */
+.card button:not(.start-btn) {
+    background: white;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 6px 16px;
+    margin: 8px 10px 0px 10px;
+    border-radius: 40px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: 0.1s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    display: flex;
+    flex: 1;
+    justify-content: center; 
+}
+
+.card button:not(.start-btn):hover {
+    border-color: var(--accent);
+    background: #eef4ff;
+    color: var(--accent);
+}
+
+/* 平衡/波形按钮激活状态 */
+.card button.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+}
+
+/* 波形按钮容器 — 与平衡按钮组样式一致 */
+.wave-buttons {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+}
+
+.pan-buttons {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+}
+
+/* 波形卡片：去除所有卡片样式，实现贯穿效果 */
+.waveform-card {
+    grid-column: span 2;          /* 保持跨列 */
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0;                    /* 确保无额外间距 */
+}
+
+/* 隐藏原来的“实时波形”标题 */
+.waveform-card h3 {
+    display: none;
+}
+
+/* 画布本身保留原有背景和边框，与贯穿融合 */
+canvas {
+    display: block;
+    width: 100%;
+    height: 130px;
+    background: #f1f5f9;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    box-sizing: border-box;       /* 确保边框不溢出 */
+}
+
+.freq-input-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+}
+
+.slider-with-value {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.slider-with-value span {
+    min-width: 65px;
+    text-align: right;
+}
+
+.footer {
+    margin-top: 24px;
+    padding: 16px 0 8px;
+    text-align: center;
+    font-size: 0.85rem;
+    color: #64748b;
+    border-top: 1px solid var(--border);
+}
+
+.footer a {
+    color: var(--text);
+    text-decoration: none;
+    margin: 0 8px;
+    white-space: nowrap;
+    transition: color 0.1s;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.footer a:hover {
+    color: var(--accent);
+    text-decoration: underline;
+}
+
+.header a {
+    display: inline-flex;
+    align-items: center;
+    color: var(--text);
+    transition: color 0.1s;
+}
+
+.header a:hover {
+    color: var(--accent);
+}
+
+.header svg {
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+}
+
+/* 中屏调整 (原750px，保留并微调) */
+@media (max-width: 750px) {
+    .controls-grid {
+        gap: 12px;
+    }
+    .card { padding: 14px; }
+    h1 { font-size: 1.6rem; }
+}
+
+/* ========== 移动端专用适配 (max-width: 600px) ========== */
+@media (max-width: 600px) {
+    body {
+        padding: 8px;
+    }
+
+    /* 网格变为单列 */
+    .controls-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    /* 波形卡片依然跨列，但此时只有一列，所以相当于占满 */
+    .waveform-card {
+        grid-column: span 1;
+    }
+
+    /* 卡片内边距减小 */
+    .card {
+        padding: 12px 14px;
+    }
+
+    /* 标题变小，左边距缩小 */
+    h1 {
+        font-size: 1.4rem;
+        padding-left: 12px;
+        border-left-width: 4px;
+    }
+
+    /* 头部图标区可能换行 */
+    .header {
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+    }
+
+    .header > div:first-child {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    /* 开始按钮缩小，但仍保持可点 */
+    .start-btn {
+        padding: 8px 24px;
+        font-size: 1.1rem;
+    }
+
+    /* 频率输入组：数字输入框占满，数值标签适当缩小 */
+    .freq-input-group {
+        flex-wrap: wrap;
+    }
+    input[type="number"] {
+        width: 100%;
+    }
+
+    /* 滑块旁边的数值显示宽度自适应 */
+    .slider-with-value span {
+        min-width: 50px;
+        font-size: 0.9rem;
+        padding: 2px 8px;
+    }
+
+    /* 波形按钮和平衡按钮：减小内边距，适应小屏 */
+    .wave-buttons button, .pan-buttons button {
+        padding: 6px 12px;
+        font-size: 0.85rem;
+        margin-right: 4px;
+    }
+
+    /* 画布高度稍微降低 */
+    canvas {
+        height: 100px;
+        border-radius: 16px;
+    }
+
+    /* 底部备案信息：每个链接单独一行，增加间距 */
+    .footer a {
+        display: block;
+        margin: 6px 0;
+        white-space: normal;
+    }
+    .footer br {
+        display: none; /* 隐藏原有的 | 分隔符，通过块级换行 */
+    }
+    /* 手动隐藏分隔符文本（原有的 "|" 仍在，用伪类隐藏? 简单处理：让父容器字体为0，然后a重新设置字体 */
+    .footer {
+        font-size: 0;  /* 隐藏 "|" 文本 */
+    }
+    .footer a {
+        font-size: 0.85rem;  /* 恢复链接字体 */
+    }
+}
+
+/* 更小屏幕 (400px以下) 进一步调整 */
+@media (max-width: 400px) {
+    h1 {
+        font-size: 1.2rem;
+    }
+    .start-btn {
+        padding: 6px 18px;
+        font-size: 1rem;
+    }
+    .wave-buttons button, .pan-buttons button {
+        padding: 5px 8px;
+        font-size: 0.8rem;
+    }
+    .card h3 {
+        font-size: 1rem;
+    }
+}
+
+.card {
+    margin: 0;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="header">
+    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+        <h1>声音发生器</h1>
+        <a href="https://space.bilibili.com/1431497051" target="_blank" title="BiliBili">
+            <svg viewBox="0 0 512 512">
+                <path fill="currentColor" d="M488.6 104.1c16.7 18.1 24.4 39.7 23.3 65.7v202.4c-.4 26.4-9.2 48.1-26.5 65.1-17.2 17-39.1 25.9-65.5 26.7H92.02c-26.45-.8-48.21-9.8-65.28-27.2C9.682 419.4.767 396.5 0 368.2V169.8c.767-26 9.682-47.6 26.74-65.7C43.81 87.75 65.57 78.77 92.02 78h29.38L96.05 52.19c-5.75-5.73-8.63-13-8.63-21.79 0-8.8 2.88-16.06 8.63-21.797C101.8 2.868 109.1 0 117.9 0q13.2 0 21.9 8.603L213.1 78h88l74.5-69.397C381.7 2.868 389.2 0 398 0q13.2 0 21.9 8.603c5.7 5.737 8.6 12.997 8.6 21.797 0 8.79-2.9 16.06-8.6 21.79L394.6 78h29.3c26.4.77 48 9.75 64.7 26.1m-38.8 69.7c-.4-9.6-3.7-17.4-10.7-23.5-5.2-6.1-14-9.4-22.7-9.8H96.05c-9.59.4-17.45 3.7-23.58 9.8-6.14 6.1-9.4 13.9-9.78 23.5v194.4c0 9.2 3.26 17 9.78 23.5s14.38 9.8 23.58 9.8H416.4c9.2 0 17-3.3 23.3-9.8s9.7-14.3 10.1-23.5zm-264.3 42.7c6.3 6.3 9.7 14.1 10.1 23.2V273c-.4 9.2-3.7 16.9-9.8 23.2-6.2 6.3-14 9.5-23.6 9.5s-17.5-3.2-23.6-9.5-9.4-14-9.8-23.2v-33.3c.4-9.1 3.8-16.9 10.1-23.2s13.2-9.6 23.3-10c9.2.4 17 3.7 23.3 10m191.5 0c6.3 6.3 9.7 14.1 10.1 23.2V273c-.4 9.2-3.7 16.9-9.8 23.2s-14 9.5-23.6 9.5-17.4-3.2-23.6-9.5c-7-6.3-9.4-14-9.7-23.2v-33.3c.3-9.1 3.7-16.9 10-23.2s14.1-9.6 23.3-10c9.2.4 17 3.7 23.3 10"></path>
+            </svg>
+        </a>
+        <a href="https://github.com/majiangla/SoundGen" target="_blank" title="GitHub">
+            <svg viewBox="0 0 512 512">
+                <path fill="currentColor" d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"></path>
+            </svg>
+        </a>
+    </div>
+    <button id="startBtn" class="start-btn">开始</button>
+  </div>
+
+  <div class="controls-grid">
+
+    <!-- 波形卡片 · 按钮样式（类似平衡） -->
+    <div class="card">
+      <h3>波形</h3>
+      <div class="wave-buttons">
+        <button type="button" data-wave="sine" class="active">正弦</button>
+        <button type="button" data-wave="square">方波</button>
+        <button type="button" data-wave="sawtooth">锯齿</button>
+        <button type="button" data-wave="triangle">三角</button>
+        <button type="button" data-wave="noise">噪声</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>频率<span class="value" id="freqValue">440 Hz</span></h3>
+      
+      <div class="freq-input-group">
+        <input type="range" id="freqSlider" min="0" max="20000" step="1" value="440">
+        <input type="number" id="freqInput" min="0" max="20000" step="1" value="440">
+        
+      </div>
+      
+    </div>
+
+    <div class="card">
+      <h3>音量<span id="volumeValue" class="value">50%</span></h3>
+      <div class="slider-with-value">
+        <input type="range" id="volume" min="0" max="1" step="0.01" value="0.5">
+        
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>平衡<span id="panValue" class="value">0.00</span></h3>
+      <div class="slider-with-value">
+        <input type="range" id="pan" min="-1" max="1" step="0.01" value="0">
+        
+      </div>
+      <div class="pan-buttons">
+        <button id="leftBtn" class="card button">左</button>
+        <button id="centerBtn" class="card button">中</button>
+        <button id="rightBtn" class="card button">右</button>
+      </div>
+    </div>
+
+    <!-- 波形显示区域：已移除卡片样式，贯穿左右（背景、边框保留在canvas上） -->
+    <div class="card waveform-card">
+      <h3>实时波形</h3>
+      <canvas id="oscilloscope"></canvas>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    <a href="https://beian.miit.gov.cn" target="_blank">苏ICP备2026009271号-1</a> |
+    <a href="https://beian.mps.gov.cn/#/query/webSearch" target="_blank">苏公网安备32011102010818号</a>
+  </div>
+
+</div>
+
+<script>
+let audioCtx, gainNode, panNode, analyser;
+let isPlaying = false;
+
+// 当前活动的声音源 (oscillator 或噪声buffer源)
+let currentSource = null;
+let currentWaveType = 'sine';       // 默认正弦
+let currentFreq = 440;
+
+// 用于 canvas 高清适配
+let devicePixelRatio = window.devicePixelRatio || 1;
+
+const startBtn = document.getElementById("startBtn");
+const freqInput = document.getElementById("freqInput");
+const freqSlider = document.getElementById("freqSlider");
+const freqValue = document.getElementById("freqValue");
+const volumeSlider = document.getElementById("volume");
+const volumeValue = document.getElementById("volumeValue");
+const panSlider = document.getElementById("pan");
+const panValue = document.getElementById("panValue");
+const canvas = document.getElementById("oscilloscope");
+const ctx = canvas.getContext("2d");
+
+// 平衡按钮
+const leftBtn = document.getElementById("leftBtn");
+const centerBtn = document.getElementById("centerBtn");
+const rightBtn = document.getElementById("rightBtn");
+
+// 波形按钮
+const waveButtons = document.querySelectorAll(".wave-buttons button");
+
+// 根据平衡值更新按钮激活状态
+function updatePanButtons(panVal) {
+    const eps = 0.001;
+    if (Math.abs(panVal + 1) < eps) {
+        leftBtn.classList.add('active');
+    } else {
+        leftBtn.classList.remove('active');
+    }
+    if (Math.abs(panVal) < eps) {
+        centerBtn.classList.add('active');
+    } else {
+        centerBtn.classList.remove('active');
+    }
+    if (Math.abs(panVal - 1) < eps) {
+        rightBtn.classList.add('active');
+    } else {
+        rightBtn.classList.remove('active');
+    }
+}
+
+// 更新波形按钮高亮
+function updateWaveButtons(type) {
+    waveButtons.forEach(btn => {
+        if (btn.dataset.wave === type) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+}
+
+// 初始化音频上下文及基础节点 (gain, pan, analyser)
+function initAudio() {
+    if (audioCtx) return;
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    gainNode = audioCtx.createGain();
+    panNode = audioCtx.createStereoPanner();
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 2048;
+
+    gainNode.connect(panNode);
+    panNode.connect(analyser);
+    analyser.connect(audioCtx.destination);
+
+    // 初始值
+    gainNode.gain.value = parseFloat(volumeSlider.value);
+    panNode.pan.value = parseFloat(panSlider.value);
+}
+
+// 根据波形类型创建源并连接到 gainNode
+function createSource(type) {
+    if (!audioCtx) initAudio();
+
+    // 销毁之前的源
+    if (currentSource) {
+        try {
+            currentSource.stop();
+        } catch (e) {}
+        currentSource.disconnect();
+        currentSource = null;
+    }
+
+    if (type === 'noise') {
+        // 创建白噪声缓冲区
+        const bufferSize = 2 * audioCtx.sampleRate; // 2秒噪声
+        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+            data[i] = Math.random() * 2 - 1;
+        }
+        const noise = audioCtx.createBufferSource();
+        noise.buffer = buffer;
+        noise.loop = true;
+        noise.connect(gainNode);
+        currentSource = noise;
+    } else {
+        // 振荡器
+        const osc = audioCtx.createOscillator();
+        osc.type = type;
+        osc.frequency.value = currentFreq;
+        osc.connect(gainNode);
+        currentSource = osc;
+    }
+
+    // 如果当前是播放状态，则启动源
+    if (isPlaying) {
+        currentSource.start();
+    }
+}
+
+// 切换波形 (内部使用，已去重)
+function setWaveType(type) {
+    if (type === currentWaveType) return;   // 相同波形不处理
+    currentWaveType = type;
+    // 更新按钮高亮（由外部调用时已经处理，但内部也保证一致性）
+    updateWaveButtons(type);
+    if (audioCtx) {
+        createSource(type);
+    }
+    // 如果不在播放状态，不需要启动源，但已经更新了currentSource以供后续start使用
+}
+
+// 更新频率 (整数)
+function updateFrequency(val) {
+    let f = parseInt(val, 10);
+    if (isNaN(f)) f = 440;
+    f = Math.min(Math.max(f, 0), 20000);
+
+    freqInput.value = f;
+    freqSlider.value = f;
+    freqValue.textContent = f + " Hz";
+
+    currentFreq = f;
+
+    // 如果当前源是振荡器，更新频率
+    if (currentSource && currentSource.frequency) {
+        currentSource.frequency.setValueAtTime(f, audioCtx.currentTime);
+    }
+}
+
+// 开始/停止按钮
+startBtn.onclick = () => {
+    if (!audioCtx) initAudio();
+
+    if (!isPlaying) {
+        // 恢复上下文 (如果被挂起)
+        audioCtx.resume().then(() => {
+            // 如果没有源或者源已停止，重新创建源
+            if (!currentSource) {
+                createSource(currentWaveType);
+            }
+            // 如果源没有启动，启动它
+            try {
+                currentSource.start();
+            } catch (e) {
+                // 可能已经启动过，忽略
+            }
+            isPlaying = true;
+            startBtn.textContent = "停止";
+        });
+    } else {
+        audioCtx.suspend().then(() => {
+            isPlaying = false;
+            startBtn.textContent = "开始";
+        });
+    }
+};
+
+// 波形按钮点击事件
+waveButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+        const wave = btn.dataset.wave;
+        if (wave === currentWaveType) return;   // 已激活则忽略
+        // 更新按钮高亮
+        waveButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        // 切换波形
+        setWaveType(wave);   // setWaveType内部会更新currentWaveType并重建源（若已初始化）
+    });
+});
+
+// 频率联动
+freqInput.addEventListener('input', () => updateFrequency(freqInput.value));
+freqSlider.addEventListener('input', () => updateFrequency(freqSlider.value));
+
+// 音量
+volumeSlider.addEventListener('input', () => {
+    let v = parseFloat(volumeSlider.value);
+    volumeValue.textContent = Math.round(v * 100) + "%";
+    if (gainNode) gainNode.gain.setValueAtTime(v, audioCtx.currentTime);
+});
+
+// 平衡滑块事件：更新数值、音频和按钮状态
+panSlider.addEventListener('input', () => {
+    let p = parseFloat(panSlider.value);
+    panValue.textContent = p.toFixed(2);
+    if (panNode) panNode.pan.setValueAtTime(p, audioCtx.currentTime);
+    updatePanButtons(p);
+});
+
+// 左按钮点击
+leftBtn.addEventListener('click', () => {
+    panSlider.value = "-1";
+    panSlider.dispatchEvent(new Event("input"));
+});
+
+// 中按钮点击
+centerBtn.addEventListener('click', () => {
+    panSlider.value = "0";
+    panSlider.dispatchEvent(new Event("input"));
+});
+
+// 右按钮点击
+rightBtn.addEventListener('click', () => {
+    panSlider.value = "1";
+    panSlider.dispatchEvent(new Event("input"));
+});
+
+// 画布高清适配
+function resizeCanvasToDisplaySize() {
+    const cssWidth = canvas.clientWidth;
+    const cssHeight = canvas.clientHeight;
+    if (cssWidth === 0 || cssHeight === 0) return false;
+
+    const newWidth = Math.round(cssWidth * devicePixelRatio);
+    const newHeight = Math.round(cssHeight * devicePixelRatio);
+
+    if (canvas.width !== newWidth || canvas.height !== newHeight) {
+        canvas.width = newWidth;
+        canvas.height = newHeight;
+        return true;
+    }
+    return false;
+}
+
+// 绘制波形
+function drawWave() {
+    requestAnimationFrame(drawWave);
+
+    resizeCanvasToDisplaySize();
+
+    ctx.fillStyle = "#f1f5f9";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const bufferLength = analyser ? analyser.fftSize : 2048;
+    const sliceWidth = canvas.width / bufferLength;
+    let x = 0;
+
+    if (isPlaying && analyser && audioCtx && audioCtx.state === 'running') {
+        // 播放模式：从 analyser 获取实时数据
+        const dataArray = new Uint8Array(bufferLength);
+        analyser.getByteTimeDomainData(dataArray);
+
+        ctx.lineWidth = 2 * devicePixelRatio;
+        ctx.strokeStyle = "#0066ff";
+        ctx.beginPath();
+        x = 0;
+        for (let i = 0; i < bufferLength; i++) {
+            const v = dataArray[i] / 128.0;
+            const y = v * canvas.height / 2;
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+            x += sliceWidth;
+        }
+        ctx.lineTo(canvas.width, canvas.height / 2);
+        ctx.stroke();
+    } else {
+        // 停止模式：静态预览，波形不滚动，幅度由音量与左右声道混合增益共同决定
+        const vol = parseFloat(volumeSlider.value);
+        const pan = parseFloat(panSlider.value);
+
+        // 混合增益 = vol * (2 - |pan|) / 2
+        const mixedGain = vol * (2 - Math.abs(pan)) / 2;
+
+        // 生成预览波形数据
+        const baseWave = new Float32Array(bufferLength);
+        if (currentWaveType === 'noise') {
+            // 噪声预览：随机
+            for (let i = 0; i < bufferLength; i++) {
+                baseWave[i] = Math.random() * 2 - 1;
+            }
+        } else {
+            // 周期性波形
+            const sampleRate = 44100;
+            for (let i = 0; i < bufferLength; i++) {
+                const t = i / sampleRate;
+                const phase = 2 * Math.PI * currentFreq * t;
+                let value;
+                switch (currentWaveType) {
+                    case 'sine': value = Math.sin(phase); break;
+                    case 'square': value = Math.sin(phase) > 0 ? 1 : -1; break;
+                    case 'sawtooth': value = 2 * ((phase / (2*Math.PI)) % 1) - 1; break;
+                    case 'triangle':
+                        const p = (phase / (2*Math.PI)) % 1;
+                        value = p < 0.5 ? 4*p - 1 : 3 - 4*p;
+                        break;
+                    default: value = 0;
+                }
+                baseWave[i] = value;
+            }
+        }
+
+        // 绘制预览波形
+        ctx.lineWidth = 2 * devicePixelRatio;
+        ctx.strokeStyle = "#0066ff";
+        ctx.beginPath();
+        x = 0;
+        for (let i = 0; i < bufferLength; i++) {
+            let val = 128 + baseWave[i] * mixedGain * 100;
+            val = Math.min(255, Math.max(0, val));
+            const y = (val / 128.0) * canvas.height / 2;
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+            x += sliceWidth;
+        }
+        ctx.stroke();
+    }
+
+    // 基线
+    ctx.beginPath();
+    ctx.strokeStyle = "#a0b8d4";
+    ctx.lineWidth = 0.8 * devicePixelRatio;
+    ctx.setLineDash([4 * devicePixelRatio, 6 * devicePixelRatio]);
+    ctx.moveTo(0, canvas.height / 2);
+    ctx.lineTo(canvas.width, canvas.height / 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+}
+
+window.addEventListener('load', () => {
+    resizeCanvasToDisplaySize();
+    drawWave();
+
+    // 初始化平衡按钮状态
+    updatePanButtons(parseFloat(panSlider.value));
+
+    // 确保波形按钮高亮与 currentWaveType 一致 (默认为正弦，且HTML中正弦按钮已带active)
+    const activeWaveBtn = document.querySelector('.wave-buttons button.active');
+    if (activeWaveBtn && activeWaveBtn.dataset.wave !== currentWaveType) {
+        currentWaveType = activeWaveBtn.dataset.wave;
+    } else if (!activeWaveBtn) {
+        updateWaveButtons('sine');
+        currentWaveType = 'sine';
+    }
+});
+
+window.addEventListener('resize', () => {
+    resizeCanvasToDisplaySize();
+});
+
+// 确保页面关闭前停止音频
+window.addEventListener('beforeunload', () => {
+    if (audioCtx) {
+        audioCtx.close();
+    }
+});
+</script>
+
+</body>
+</html>
